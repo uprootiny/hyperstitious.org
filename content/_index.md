@@ -31,3 +31,8 @@ Making AI systems transparent and accessible—creating simple showcases where y
 - **Dynamical Systems Theory** — Explored topological transformations in tensor spaces and representation theory
 - **Philosophy of AI Alignment** — Developed gamified systems for value articulation using academic philosophical frameworks
 - **Musical Composition** — Organ arrangements translating narrative motifs into musical structures, recently performed arrangements of poetry
+
+## Contact
+
+- **GitHub**: [@uprootiny](https://github.com/uprootiny)
+- **Telegram**: [@uprootiny](https://t.me/uprootiny)
