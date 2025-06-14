@@ -1,0 +1,28 @@
+{:source-paths ["src"]
+ :dependencies [[com.hyperfiddle/electric "v2-alpha-540-gb9a7bb1c"]
+                [reagent/reagent "1.2.0"]]
+ 
+ :dev-http {8280 "public"}
+ 
+ :builds
+ {:electric-workbench
+  {:target :browser
+   :output-dir "public/js"
+   :asset-path "/js"
+   :modules {:main {:init-fn electric.workbench/init-electric-workbench
+                    :entries [electric.workbench]}}
+   :devtools {:http-root "public"
+              :http-port 8280
+              :preloads [hyperfiddle.electric-client]}}
+  
+  :server
+  {:target :node-script
+   :output-to "target/server.js"
+   :main electric.server/main
+   :devtools {:before-load-async electric.server/stop-server!
+              :after-load-async electric.server/start-server!}}
+  
+  :test
+  {:target :node-test
+   :output-to "target/test.js"
+   :autorun true}}}

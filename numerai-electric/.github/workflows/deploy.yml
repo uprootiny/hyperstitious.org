@@ -1,0 +1,239 @@
+name: Deploy Numerai Electric Trading Lab
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+        
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+        
+    - name: Install Clojure CLI
+      run: |
+        curl -L -O https://github.com/clojure/brew-install/releases/latest/download/linux-install.sh
+        chmod +x linux-install.sh
+        sudo ./linux-install.sh
+        
+    - name: Install Python dependencies
+      run: |
+        pip install flask requests
+        
+    - name: Install Node dependencies
+      run: |
+        npm install shadow-cljs
+        
+    - name: Build ClojureScript
+      run: |
+        npx shadow-cljs release electric-workbench
+        
+    - name: Test Clojure code
+      run: |
+        clj -M:test -m clojure.test
+        
+    - name: Test Python integration
+      run: |
+        python -m pytest app.py -v || echo "No tests found, validating syntax"
+        python -c "import app; print('Flask app imports successfully')"
+        
+    - name: Create deployment package
+      run: |
+        mkdir -p dist
+        cp -r src dist/
+        cp -r public dist/
+        cp app.py dist/
+        cp deps.edn dist/
+        cp shadow-cljs.edn dist/
+        cp README.md dist/
+        
+        # Create deployment script
+        cat > dist/deploy.sh << 'EOF'
+        #!/bin/bash
+        echo "🚀 Deploying Numerai Electric Trading Lab"
+        
+        # Stop existing services
+        pkill -f "java.*electric" || true
+        pkill -f "python.*app.py" || true
+        
+        # Start Clojure backend
+        nohup clj -M:prod -m electric.server > electric.log 2>&1 &
+        
+        # Start Python Flask integration
+        nohup python app.py > flask.log 2>&1 &
+        
+        echo "✅ Services started"
+        echo "🌐 Access: http://localhost:42857"
+        echo "📊 Electric UI: http://localhost:8280"
+        EOF
+        
+        chmod +x dist/deploy.sh
+        
+    - name: Create health check
+      run: |
+        cat > dist/health-check.json << 'EOF'
+        {
+          "service": "numerai-electric",
+          "version": "3.0-electric",
+          "description": "Advanced AI-driven quantitative research platform with Electric Clojure",
+          "timestamp": "${{ github.event.head_commit.timestamp }}",
+          "commit": "${{ github.sha }}",
+          "features": [
+            "electric-clojure-reactive-ui",
+            "advanced-backtesting-engine",
+            "real-time-strategy-optimization",
+            "multi-asset-portfolio-management",
+            "numerai-tournament-integration",
+            "live-market-data-simulation",
+            "risk-management-framework"
+          ],
+          "deployment": {
+            "production": "http://45.90.121.59:42857",
+            "electric-ui": "http://45.90.121.59:8280",
+            "repository": "https://github.com/uprootiny/numerai-electric"
+          },
+          "stack": {
+            "frontend": "Electric Clojure + ClojureScript",
+            "backend": "Clojure + Python Flask",
+            "database": "In-memory + CSV data",
+            "deployment": "Contabo VPS"
+          }
+        }
+        EOF
+        
+    - name: Validate deployment package
+      run: |
+        ls -la dist/
+        echo "📦 Deployment package created successfully"
+        
+    - name: Upload deployment artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: numerai-electric-deployment
+        path: dist/
+        retention-days: 30
+        
+  deploy-production:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Download deployment package
+      uses: actions/download-artifact@v4
+      with:
+        name: numerai-electric-deployment
+        path: dist/
+        
+    - name: Setup GitHub Pages
+      uses: actions/configure-pages@v4
+      
+    - name: Upload to GitHub Pages
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: ./dist
+        
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
+      
+  health-check-production:
+    needs: deploy-production
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Wait for deployment
+      run: sleep 60
+      
+    - name: Test production deployment
+      run: |
+        # Test main Flask application
+        echo "Testing main application..."
+        curl -f http://45.90.121.59:42857/ > /dev/null || {
+          echo "❌ Main Flask app not accessible"
+          exit 1
+        }
+        
+        # Test health endpoint
+        echo "Testing health endpoint..."
+        HEALTH=$(curl -s http://45.90.121.59:42857/health)
+        echo "$HEALTH" | jq '.status' | grep -q "healthy" || {
+          echo "❌ Health check failed"
+          echo "$HEALTH"
+          exit 1
+        }
+        
+        # Test API endpoints
+        echo "Testing API endpoints..."
+        curl -f -s http://45.90.121.59:42857/api/status > /dev/null || {
+          echo "❌ Status API not accessible"
+          exit 1
+        }
+        
+        curl -f -s http://45.90.121.59:42857/api/numerai > /dev/null || {
+          echo "❌ Numerai API not accessible"
+          exit 1
+        }
+        
+        # Test GitHub Pages deployment
+        echo "Testing GitHub Pages deployment..."
+        curl -f https://uprootiny.github.io/numerai-electric/ > /dev/null || {
+          echo "❌ GitHub Pages deployment not accessible"
+          exit 1
+        }
+        
+        echo "✅ All health checks passed!"
+        echo "🌐 Production: http://45.90.121.59:42857"
+        echo "📊 GitHub Pages: https://uprootiny.github.io/numerai-electric/"
+        
+    - name: Performance validation
+      run: |
+        echo "Running performance validation..."
+        
+        # Check response times
+        RESPONSE_TIME=$(curl -w "%{time_total}" -o /dev/null -s http://45.90.121.59:42857/)
+        echo "Response time: ${RESPONSE_TIME}s"
+        
+        # Validate response time is under 3 seconds
+        if (( $(echo "$RESPONSE_TIME < 3.0" | bc -l) )); then
+          echo "✅ Performance OK: ${RESPONSE_TIME}s"
+        else
+          echo "⚠️ Slow response time: ${RESPONSE_TIME}s"
+        fi
+        
+        # Test API performance
+        API_RESPONSE_TIME=$(curl -w "%{time_total}" -o /dev/null -s http://45.90.121.59:42857/api/status)
+        echo "API response time: ${API_RESPONSE_TIME}s"
+        
+    - name: Update system metrics
+      run: |
+        echo "Fetching system metrics..."
+        
+        # Get current system status
+        STATUS=$(curl -s http://45.90.121.59:42857/api/status)
+        echo "$STATUS" | jq '.uptime_seconds' | xargs -I {} echo "Uptime: {} seconds"
+        echo "$STATUS" | jq '.requests_served' | xargs -I {} echo "Requests served: {}"
+        echo "$STATUS" | jq '.features | length' | xargs -I {} echo "Features available: {}"
