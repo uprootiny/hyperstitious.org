@@ -1,0 +1,25 @@
+;; shadow-cljs configuration for the theme's frontend app.
+{:lein false
+ :source-paths
+ ["src"]
+
+ :dependencies
+ [[reagent "1.2.0"]]
+
+ :builds
+ {:app
+  {:target :browser
+   ;; This is the key part: the output file goes directly
+   ;; into the theme's static js directory, where Zola can find it.
+   :output-dir "../static/js"
+   :asset-path "/js"
+   :module-hash-names true
+   :modules
+   {:main
+    {:init-fn main/init}
+    :sift
+     {:init-fn sift/mount
+      :depends-on #{:main}}
+    :playground
+     {:init-fn playground/mount
+      :depends-on #{:main}}}}}}

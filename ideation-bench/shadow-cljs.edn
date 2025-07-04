@@ -1,0 +1,9 @@
+;; shadow-cljs configuration
+{:source-paths
+ ["src"]
+
+ :builds
+ {:bench
+  {:target :node-script
+   :output-to "main.js"
+   :main bench.core/main}}}

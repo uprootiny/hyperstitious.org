@@ -36,10 +36,24 @@
       <a class="link" href="https://www.getzola.org/" target="_blank">{{
         m_i18n::tr(key=`footer_powered_by`, lk=g_lang_k, d=g_trans_d) }}</a>
     </span>
+    <span class="mr-6 lg:ml-6">
+      <a class="link" href="{{ get_url(path="@/playground.md") | safe }}">{{
+        m_i18n::tr(key=`footer_playground`, lk=g_lang_k, d=g_trans_d, default=`Playground`) }}</a>
+    </span>
+    <span class="mr-6 lg:ml-6">
+      <a class="link" href="{{ get_url(path="@/sift.md") | safe }}">{{
+        m_i18n::tr(key=`footer_sift`, lk=g_lang_k, d=g_trans_d, default=`Sift`) }}</a>
+    </span>
+    <span class="mr-6 lg:ml-6">
+      <a class="link" href="{{ get_url(path="@/hyperstitions.md") | safe }}">{{
+        m_i18n::tr(key=`footer_colophon`, lk=g_lang_k, d=g_trans_d, default=`Colophon`) }}</a>
+    </span>
     <a class="link" href="https://www.getzola.org/themes/linkita/" target="_blank">&#9998; {{
       m_i18n::tr(key=`footer_theme_name`, lk=g_lang_k, d=g_trans_d) }}</a>
   </div>
   <!-- Begin Footer inject -->
   {% include "injects/footer.html" ignore missing %}
   <!-- End Footer inject -->
+
+  <script defer src="{{ get_url(path='js/main.js') | safe }}"></script>
 </footer>

@@ -1,0 +1,22 @@
+{
+  "name": "cljs-app",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "shadow-cljs": "^3.1.7"
+  },
+  "dependencies": {
+    "cytoscape": "^3.32.0",
+    "cytoscape-edgehandles": "^4.0.1",
+    "js-yaml": "^4.1.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  }
+}
