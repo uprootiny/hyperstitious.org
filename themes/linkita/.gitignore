@@ -1,1 +1,2 @@
 /node_modules
+\n# Shadow-CLJS generated files\n/static/js/main.*.js\n/static/js/sift.*.js\n/static/js/playground.*.js\n/static/js/manifest.edn\n/.shadow-cljs/

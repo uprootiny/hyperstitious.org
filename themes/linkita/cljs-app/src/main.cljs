@@ -37,4 +37,4 @@
 
     ;; If we find the playground app mount, load the playground module
     (.getElementById js/document "cljs-playground-app")
-    (js/require #js ["./playground.js"] (fn [pg] (pg/mount))))))
+    (js/require #js ["./playground.js"] (fn [pg] (pg/mount)))))

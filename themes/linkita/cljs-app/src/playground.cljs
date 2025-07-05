@@ -17,7 +17,7 @@
      {:data {:id "api" :label "API Server" :compute 1}}]
     :validation (fn [cy] (if (> (-> cy (.edges "[source='client'][target='api']") .js_length) 0)
                           {:valid? true :message "Correct!"}
-                          {:valid? false :message "Not quite. Try creating an edge."})))}])
+                          {:valid? false :message "Not quite. Try creating an edge."}))}])
 
 (def node-types
   [{:type :api-server :label "API Server" :style {:background-color "#0d9488"}}
